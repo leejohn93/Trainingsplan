@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<title>My Fitness Coach</title>
+
+<style>
+*{box-sizing:border-box}
+html{min-height:100%;scroll-behavior:smooth}
+body{
+margin:0;color:#fff;font-family:Arial,sans-serif;
+background:#080808;isolation:isolate;min-height:100vh;
+}
+body::before{
+content:"";position:fixed;inset:0;z-index:-2;
+background:
+linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.18) 50%,rgba(0,0,0,.25)),
+url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=2000&q=85")
+center center/cover no-repeat;
+}
+body::after{
+content:"";position:fixed;inset:0;z-index:-1;
+pointer-events:none;background:rgba(0,0,0,.04);
+}
+.app{max-width:950px;margin:auto;padding:12px}
+header,.panel,.exercise{
+position:relative;overflow:hidden;
+border:1px solid rgba(255,255,255,.25);
+border-radius:15px;background:rgba(8,8,8,.20);
+backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+box-shadow:0 8px 28px rgba(0,0,0,.25);
+}
+header{
+padding:30px 15px;text-align:center;margin-bottom:14px;
+background:rgba(0,0,0,.16);
+}
+header:after,.panel:after,.exercise:after{
+content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+background:
+linear-gradient(125deg,transparent 20%,#fff7 20.2%,transparent 20.5%),
+linear-gradient(145deg,transparent 65%,#fff5 65.2%,transparent 65.5%),
+linear-gradient(35deg,transparent 88%,#fff6 88.2%,transparent 88.5%);
+}
+.logo{font-size:27px;font-weight:900;letter-spacing:3px;text-shadow:0 2px 10px #000}
+.sub{font-size:11px;letter-spacing:2px;color:#ddd;margin-top:9px}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}
+button,select,input{font:inherit}
+button{
+border:1px solid rgba(255,255,255,.45);border-radius:9px;
+padding:12px 8px;color:white;background:rgba(10,10,10,.35);
+backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+font-weight:bold;cursor:pointer;transition:background .2s,transform .2s;
+}
+button:active{transform:scale(.98)}
+button.active,.primary{background:rgba(255,255,255,.94);color:#080808;border-color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+.page{display:none}
+.page.active{display:block}
+.panel{padding:17px;margin-bottom:14px}
+.panel>*{position:relative;z-index:1}
+h2{font-size:20px;margin:0 0 13px}
+h3{font-size:16px}
+p{line-height:1.5}
+.muted{color:#eee;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tile{
+min-height:90px;text-align:left;padding:15px;
+background:rgba(5,5,5,.16);border:1px solid rgba(255,255,255,.28);
+}
+.tile b{display:block;font-size:16px;margin-bottom:7px}
+.tile span{font-size:12px;color:#eee}
+input,select{
+width:100%;padding:12px;margin:7px 0 12px;
+border:1px solid rgba(255,255,255,.4);border-radius:8px;
+background:rgba(10,10,10,.25);color:white;
+}
+input::placeholder{color:#ccc}
+select option{background:#111;color:white}
+label{font-size:12px;color:#eee}
+.action-row{display:flex;flex-wrap:wrap;gap:8px}
+.action-row button{flex:1}
+.exercise{padding:14px;margin:10px 0;background:rgba(0,0,0,.18)}
+.exercise>*{position:relative;z-index:1}
+.exercise b{font-size:15px}
+.exercise small{display:block;color:#eee;margin-top:5px}
+.exercise .detail{color:#fff;font-size:13px;margin-top:9px}
+.tag{display:inline-block;border:1px solid #aaa;border-radius:20px;padding:5px 8px;font-size:10px;color:#ddd;margin:7px 4px 0 0}
+.timer{text-align:center;padding:15px}
+.clock{font-size:52px;font-weight:bold;letter-spacing:3px;margin:15px 0;text-shadow:0 2px 12px #000}
+.big-number{font-size:34px;font-weight:bold;margin:12px 0}
+.quote{font-size:18px;font-weight:bold;text-align:center;line-height:1.5;text-shadow:0 2px 8px #000}
+.status{
+padding:10px;background:rgba(0,0,0,.16);
+backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+border:1px solid rgba(255,255,255,.2);border-radius:8px;
+color:#fff;font-size:13px;line-height:1.5;
+}
+video{width:100%;border-radius:10px;background:#000;margin:10px 0}
+#scanner-area{display:none}
+.week{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.week div{
+padding:12px;border:1px solid rgba(255,255,255,.25);
+border-radius:8px;background:rgba(0,0,0,.18);
+backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);font-size:13px;
+}
+.week b{display:block;margin-bottom:5px}
+hr{border:0;border-top:1px solid rgba(255,255,255,.3);margin:16px 0}
+footer{text-align:center;color:#ddd;font-size:11px;padding:20px;text-shadow:0 2px 8px #000}
+.workout-card{margin-top:10px}
+.workout-card>button{
+width:100%;text-align:left;padding:15px;background:rgba(0,0,0,.18);
+border:1px solid rgba(255,255,255,.3);
+backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+.workout-card>button b{display:block;font-size:16px;margin-bottom:6px}
+.workout-card>button span{font-size:12px;color:#eee}
+.workout-card>button:active{background:rgba(80,80,80,.4)}
+.exercise-name{font-weight:bold;font-size:15px;line-height:1.5}
+.exercise-english{color:#eee;font-size:13px;margin-top:5px}
+.exercise-sets{font-size:14px;margin-top:10px;font-weight:bold}
+.exercise-method{color:#eee;font-size:12px;margin-top:8px;line-height:1.5}
+.back-workout{margin:12px 0}
+.creatine-result{font-size:16px;line-height:1.7}
+.green{color:#c5ff6a}
+@media(max-width:500px){
+.app{padding:9px}.logo{font-size:23px}
+nav button{font-size:11px;padding:12px 3px}
+.grid{grid-template-columns:1fr 1fr}.clock{font-size:43px}
+}
+@supports not (backdrop-filter:blur(5px)){
+header,.panel,.exercise,.tile,.week div,.status,button{background:rgba(5,5,5,.82)}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+<div class="logo">MY FITNESS COACH</div>
+<div class="sub">YOUR BODY · YOUR PLAN · YOUR PROGRESS</div>
+</header>
+
+<nav>
+<button class="active" onclick="page('home',this)">START</button>
+<button onclick="page('training',this)">TRAINING</button>
+<button onclick="page('tools',this)">TOOLS</button>
+</nav>
+
+<section id="home" class="page active">
+<div class="panel">
+<h2>WILLKOMMEN ZURÜCK!</h2>
+<p class="quote" id="motivation">Keine Ausreden. Deine Muskeln warten nicht. 😈</p>
+<button class="primary" onclick="newQuote()">NEUER MOTIVATIONSSPRUCH</button>
+</div>
+
+<div class="panel">
+<h2>DEINE FITNESS-BEREICHE</h2>
+<div class="grid">
+<button class="tile" onclick="page('training')"><b>TRAININGSPLÄNE</b><span>Deine Workouts und Alternativen</span></button>
+<button class="tile" onclick="page('scanner')"><b>BARCODE-SCANNER</b><span>Geräte im Gym erfassen</span></button>
+<button class="tile" onclick="page('creatine')"><b>KREATIN-COACH</b><span>Menge berechnen und abhaken</span></button>
+<button class="tile" onclick="page('timer')"><b>PAUSEN-TIMER</b><span>Deine Satzpausen tracken</span></button>
+<button class="tile" onclick="page('homework')"><b>HOME-WORKOUT</b><span>Kleine Übungen für zu Hause</span></button>
+<button class="tile" onclick="page('scanner')"><b>MEINE GERÄTE</b><span>Gespeicherte Gym-Geräte</span></button>
+</div>
+</div>
+
+<div class="panel">
+<h2>DEINE TRAININGSWOCHE</h2>
+<div class="week">
+<div><b>MONTAG</b>Push A</div>
+<div><b>DIENSTAG</b>Pull A</div>
+<div><b>MITTWOCH</b>Beine</div>
+<div><b>DONNERSTAG</b>Push B</div>
+<div><b>FREITAG</b>Pull B</div>
+<div><b>SAMSTAG</b>Erholung</div>
+<div><b>SONNTAG</b>Erholung</div>
+</div>
+</div>
+
+<div class="panel">
+<h2>KREATIN-CHECK</h2>
+<div id="home-creatine" class="status">Lade deinen Tagesstatus ...</div>
+<button class="primary" onclick="page('creatine')">KREATIN EINSTELLEN</button>
+</div>
+</section>
+
+<section id="training" class="page">
+<div class="panel">
+<h2>DEINE TRAININGSPLÄNE</h2>
+<label>Trainingsplan auswählen</label>
+<select id="plan-select" onchange="renderPlan()">
+<option value="ppl">Push / Pull / Beine / Push / Pull</option>
+<option value="upper">Oberkörper / Unterkörper</option>
+<option value="full">Ganzkörper</option>
+</select>
+<p class="muted">Klicke auf einen Trainingstag, um alle Übungen, Gerätenamen, Sätze und Wiederholungen zu sehen.</p>
+<div id="plan-content"></div>
+</div>
+</section>
+
+<section id="tools" class="page">
+<div class="panel">
+<h2>DEINE TRAININGS-TOOLS</h2>
+<div class="grid">
+<button class="tile" onclick="page('timer')"><b>PAUSEN-TIMER</b><span>Satzpausen messen</span></button>
+<button class="tile" onclick="page('creatine')"><b>KREATIN</b><span>Deine tägliche Menge</span></button>
+<button class="tile" onclick="page('scanner')"><b>SCANNER</b><span>Geräte scannen</span></button>
+<button class="tile" onclick="page('homework')"><b>HOME-WORKOUT</b><span>Training zu Hause</span></button>
+</div>
+</div>
+</section>
+
+<!-- KREATIN MIT REPARIERTER GEWICHTSEINGABE -->
+<section id="creatine" class="page">
+<div class="panel">
+<h2>DEIN KREATIN-RECHNER</h2>
+<p class="muted">Gib dein Körpergewicht ein. Deine Eingabe wird gespeichert und beim nächsten Öffnen wieder angezeigt.</p>
+
+<label for="weight">DEIN KÖRPERGEWICHT IN KG</label>
+<input id="weight" type="number" min="1" max="300" step="0.1" inputmode="decimal" placeholder="z. B. 80">
+
+<button class="primary" style="width:100%" onclick="calculateCreatine()">GEWICHT SPEICHERN & MENGE BERECHNEN</button>
+
+<div id="creatine-result" class="status creatine-result" style="margin-top:12px">
+Noch kein Gewicht eingetragen.
+</div>
+
+<hr>
+
+<h3>DEINE TÄGLICHE KREATINMENGE</h3>
+<div id="creatine-amount" class="status">
+Noch nicht berechnet.
+</div>
+
+<hr>
+
+<h3>DEINE TÄGLICHE EINNAHME</h3>
+<div id="creatine-status" class="status">Noch nicht eingerichtet.</div>
+<div class="action-row" style="margin-top:10px">
+<button class="primary" onclick="enableReminder()">ERINNERUNG AKTIVIEREN</button>
+<button onclick="takenCreatine()">HEUTE EINGENOMMEN ✓</button>
+</div>
+
+<p class="muted">Kreatin wird üblicherweise täglich genommen, auch an trainingsfreien Tagen. Für die meisten gesunden Erwachsenen reichen 3–5 g täglich; eine Ladephase ist nicht erforderlich. Eine gewichtsbasierte Berechnung ist nicht zwingend notwendig. Bei Nierenerkrankungen bitte ärztlich nachfragen.</p>
+</div>
+</section>
+
+<section id="timer" class="page">
+<div class="panel timer">
+<h2>PAUSEN-TIMER</h2>
+<p class="muted">Stell deine Pause zwischen den Sätzen ein.</p>
+<div class="clock" id="clock">01:30</div>
+<label>Pause auswählen</label>
+<select id="timer-duration" onchange="setTimer()">
+<option value="60">60 Sekunden</option>
+<option value="90" selected>90 Sekunden</option>
+<option value="120">120 Sekunden</option>
+<option value="150">150 Sekunden</option>
+<option value="180">180 Sekunden</option>
+</select>
+<div class="action-row">
+<button class="primary" onclick="startTimer()">START</button>
+<button onclick="pauseTimer()">PAUSE</button>
+<button onclick="resetTimer()">RESET</button>
+</div>
+<p id="timer-message" class="status">Bereit für deinen nächsten Satz?</p>
+</div>
+</section>
+
+<section id="scanner" class="page">
+<div class="panel">
+<h2>GYM-GERÄTE-SCANNER</h2>
+<p class="muted">Scanne den Barcode oder QR-Code am Gerät. Du kannst anschließend den Namen der Maschine zuordnen und speichern.</p>
+<button class="primary" onclick="startScanner()">KAMERA STARTEN</button>
+<button onclick="stopScanner()">KAMERA STOPPEN</button>
+<div id="scanner-area">
+<video id="video" autoplay playsinline muted></video>
+</div>
+<div id="scan-result" class="status">Noch kein Barcode gescannt.</div>
+<label>Barcode-Nummer</label>
+<input id="barcode" placeholder="Barcode wird hier angezeigt">
+<label>Name des Geräts</label>
+<input id="device-name" placeholder="z. B. Brustpresse">
+<button class="primary" onclick="saveDevice()">GERÄT SPEICHERN</button>
+<hr>
+<h3>MEINE GESPEICHERTEN GERÄTE</h3>
+<div id="device-list"></div>
+<p class="muted">Hinweis: Nicht jedes Fitnessgerät hat einen Barcode. Du ordnest den Gerätenamen beim ersten Scan selbst zu.</p>
+</div>
+</section>
+
+<section id="homework" class="page">
+<div class="panel">
+<h2>DEIN HOME-WORKOUT</h2>
+<p class="muted">Kleine Einheiten für zu Hause. Wähle eine kurze Trainingseinheit.</p>
+<label>Einheit auswählen</label>
+<select id="home-level" onchange="renderHome()">
+<option value="short">10 Minuten – kurz und knackig</option>
+<option value="upper">Oberkörper – ohne Geräte</option>
+<option value="core">Bauch und Rumpf</option>
+<option value="mobility">Mobilität und Beweglichkeit</option>
+</select>
+<div id="home-content"></div>
+</div>
+</section>
+
+<footer>MY FITNESS COACH · GYM GLASS EDITION</footer>
+</div>
+
+<script>
+// NAVIGATION
+function page(id,button){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+const target=document.getElementById(id);
+if(target)target.classList.add("active");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+if(button)button.classList.add("active");
+else if(["home","training","tools"].includes(id)){
+const index={home:0,training:1,tools:2}[id];
+document.querySelectorAll("nav button")[index].classList.add("active");
+}
+window.scrollTo({top:0,behavior:"smooth"});
+if(id==="scanner")renderDevices();
+if(id==="homework")renderHome();
+if(id==="creatine")loadCreatine();
+if(id==="home")updateHomeCreatine();
+}
+
+// MOTIVATION
+const quotes=[
+"Deine Ausreden trainieren schon genug. Jetzt bist du dran. 😈",
+"Noch ein Satz. Dein Sofa läuft dir nicht weg.",
+"Schweiß ist nur dein Körper, der deine Ausreden rausspült.",
+"Du wolltest einen breiten Rücken. Nicht breite Ausreden.",
+"Andere scrollen. Du wirst stärker.",
+"Wenn du jetzt aufhörst, war das Aufwärmen umsonst.",
+"Deine Muskeln kennen keine Snooze-Taste.",
+"Heute schwer. Morgen stärker."
+];
+function newQuote(){
+document.getElementById("motivation").textContent=quotes[Math.floor(Math.random()*quotes.length)];
+}
+newQuote();
+
+// TRAININGSPLÄNE – DEINE ORIGINALEN ÜBUNGEN
+const plans={
+ppl:{
+name:"Push / Pull / Beine / Push / Pull",
+days:[
+{name:"PUSH A",subtitle:"Brust · Schulter · Trizeps",exercises:[
+["Brustpresse","Chest Press Machine","3 × 8–12",""],
+["Schräg-Brustpresse","Incline Chest Press Machine","2 × 10–12",""],
+["Butterfly-Maschine","Pec Deck Machine","2 × 12–15","(Dropsatz möglich)"],
+["Seitheben-Maschine","Lateral Raise Machine","3 × 12–15","(Dropsatz möglich)"],
+["Schulterpresse","Shoulder Press Machine","2 × 10–12",""],
+["Trizepsdrücken am Seil","Rope Triceps Pushdown","3 × 10–15","(Dropsatz möglich)"],
+["Überkopf-Trizepsstrecken am Kabel","Overhead Cable Triceps Extension","2 × 12–15",""]
+]},
+{name:"PULL A",subtitle:"Rücken · Bizeps · Unterarme",exercises:[
+["Latzug zur Brust – weiter Griff","Wide-Grip Lat Pulldown","3 × 8–12",""],
+["Sitzendes Kabelrudern","Seated Cable Row","3 × 10–12",""],
+["Rudern an der Hebelmaschine","Hammer Strength Row","2 × 10–12",""],
+["Reverse Butterfly","Reverse Pec Deck","2 × 12–15",""],
+["Bizepsmaschine","Biceps Curl Machine","3 × 10–12","(Dropsatz möglich)"],
+["Hammer-Curls mit Kurzhanteln","Dumbbell Hammer Curls","2 × 10–12",""],
+["Reverse Curls","Reverse Biceps Curls","2 × 12–15",""]
+]},
+{name:"BEINE",subtitle:"Oberschenkel · Gesäß · Adduktoren",exercises:[
+["Beinpresse","Leg Press Machine","2–3 × 10–12",""],
+["Beinbeuger sitzend","Seated Leg Curl","3 × 10–15","(Dropsatz möglich)"],
+["Beinstrecker","Leg Extension Machine","2 × 12–15",""],
+["Adduktorenmaschine","Hip Adductor Machine","3 × 12–15","(Supersatz mit Abduktoren möglich)"],
+["Abduktorenmaschine","Hip Abductor Machine","2–3 × 12–15","(Supersatz mit Adduktoren möglich)"],
+["Wadenheben sitzend","Seated Calf Raise","3 × 12–15",""],
+["Glute Bridge","Glute Bridge","2 × 12–15",""]
+]},
+{name:"PUSH B",subtitle:"Brust · Schulter · Trizeps",exercises:[
+["Schrägbankdrücken mit Kurzhanteln","Incline Dumbbell Press","3 × 8–12",""],
+["Kabel-Fliegende","Cable Fly","2 × 12–15","(Dropsatz möglich)"],
+["Schulterpresse","Shoulder Press Machine","2 × 10–12",""],
+["Einarmiges Seitheben am Kabel","Single-Arm Cable Lateral Raise","3 × 12–15 je Seite","(Dropsatz möglich)"],
+["Reverse Butterfly","Reverse Pec Deck","2 × 12–15",""],
+["Trizepsdrücken am Kabel","Cable Triceps Pushdown","3 × 10–15","(Dropsatz möglich)"],
+["Einarmiges Trizepsdrücken","Single-Arm Triceps Pushdown","2 × 12–15 je Seite",""]
+]},
+{name:"PULL B",subtitle:"Rücken · Bizeps · Unterarme",exercises:[
+["Neutraler Latzug","Neutral-Grip Lat Pulldown","3 × 8–12",""],
+["Brustgestütztes Rudern","Chest-Supported Row","3 × 8–12",""],
+["Einarmiges Kabelrudern","Single-Arm Cable Row","2 × 10–12 je Seite",""],
+["Schrägbank-Bizepscurls","Incline Dumbbell Curls","3 × 10–12","(Supersatz mit Hammer-Curls möglich)"],
+["Hammer-Curls am Seil","Rope Hammer Curls","2 × 10–12","(Supersatz mit Schrägbank-Curls möglich)"],
+["Handgelenkbeugen","Wrist Curls","2 × 15–20","(Supersatz mit Reverse Wrist Curls möglich)"],
+["Umgekehrte Handgelenkbeugen","Reverse Wrist Curls","2 × 15–20","(Supersatz mit Wrist Curls möglich)"]
+]}
+]
+},
+upper:{
+name:"Oberkörper / Unterkörper",
+days:[
+{name:"OBERKÖRPER A",subtitle:"Brust · Rücken · Arme",exercises:[
+["Brustpresse","Chest Press Machine","3 × 8–12",""],
+["Latzug","Lat Pulldown","3 × 8–12",""],
+["Schulterpresse","Shoulder Press Machine","2 × 10–12",""],
+["Sitzendes Rudern","Seated Cable Row","3 × 10–12",""],
+["Bizepscurls","Biceps Curls","2 × 10–12","(Supersatz mit Trizeps möglich)"],
+["Trizepsdrücken","Triceps Pushdown","2 × 10–15","(Supersatz mit Bizeps möglich)"]
+]},
+{name:"UNTERKÖRPER A",subtitle:"Beine · Adduktoren · Waden",exercises:[
+["Beinpresse","Leg Press Machine","3 × 10–12",""],
+["Beinbeuger","Leg Curl Machine","3 × 10–15",""],
+["Adduktorenmaschine","Hip Adductor Machine","3 × 12–15","(Supersatz mit Abduktoren möglich)"],
+["Abduktorenmaschine","Hip Abductor Machine","2 × 12–15","(Supersatz mit Adduktoren möglich)"],
+["Wadenheben","Calf Raise","3 × 12–15",""]
+]},
+{name:"OBERKÖRPER B",subtitle:"Brust · Rücken · Schultern · Arme",exercises:[
+["Schrägbankdrücken","Incline Dumbbell Press","3 × 8–12",""],
+["Kabelrudern","Cable Row","3 × 10–12",""],
+["Seitheben","Lateral Raises","3 × 12–15","(Dropsatz möglich)"],
+["Reverse Butterfly","Reverse Pec Deck","2 × 12–15",""],
+["Hammer-Curls","Hammer Curls","2 × 10–12","(Supersatz mit Trizeps möglich)"],
+["Trizepsdrücken","Triceps Pushdown","2 × 10–15","(Supersatz mit Hammer-Curls möglich)"]
+]},
+{name:"UNTERKÖRPER B",subtitle:"Beine · Gesäß · Adduktoren",exercises:[
+["Beinbeuger","Leg Curl Machine","3 × 10–15",""],
+["Beinstrecker","Leg Extension Machine","2 × 12–15",""],
+["Adduktorenmaschine","Hip Adductor Machine","3 × 12–15","(Supersatz mit Abduktoren möglich)"],
+["Abduktorenmaschine","Hip Abductor Machine","2 × 12–15","(Supersatz mit Adduktoren möglich)"],
+["Wadenheben sitzend","Seated Calf Raise","3 × 12–15",""]
+]}
+]
+},
+full:{
+name:"Ganzkörper",
+days:[
+{name:"GANZKÖRPER A",subtitle:"Ganzkörpertraining",exercises:[
+["Beinpresse","Leg Press Machine","3 × 10–12",""],
+["Brustpresse","Chest Press Machine","3 × 8–12",""],
+["Latzug","Lat Pulldown","3 × 8–12",""],
+["Beinbeuger","Leg Curl Machine","2 × 12–15",""],
+["Seitheben","Lateral Raise Machine","2 × 12–15","(Dropsatz möglich)"],
+["Bauchmaschine","Abdominal Crunch Machine","2 × 12–15",""]
+]},
+{name:"GANZKÖRPER B",subtitle:"Ganzkörpertraining",exercises:[
+["Beinbeuger","Leg Curl Machine","3 × 10–15",""],
+["Schrägbankdrücken","Incline Dumbbell Press","3 × 8–12",""],
+["Rudern","Seated Row Machine","3 × 10–12",""],
+["Adduktorenmaschine","Hip Adductor Machine","2 × 12–15","(Supersatz mit Abduktoren möglich)"],
+["Bizepscurls","Biceps Curls","2 × 10–12","(Supersatz mit Trizeps möglich)"],
+["Trizepsdrücken","Triceps Pushdown","2 × 10–15","(Supersatz mit Bizeps möglich)"]
+]},
+{name:"GANZKÖRPER C",subtitle:"Ganzkörpertraining",exercises:[
+["Beinpresse","Leg Press Machine","3 × 10–12",""],
+["Schulterpresse","Shoulder Press Machine","2 × 10–12",""],
+["Latzug","Lat Pulldown","3 × 8–12",""],
+["Brustpresse","Chest Press Machine","2 × 10–12",""],
+["Wadenheben","Calf Raise","3 × 12–15",""],
+["Rumpftraining","Core Training","2 × 15",""]
+]}
+]
+}
+};
+
+function renderPlan(){
+const key=document.getElementById("plan-select").value;
+const plan=plans[key];
+document.getElementById("plan-content").innerHTML=`
+<h3>${plan.name}</h3>
+${plan.days.map((day,index)=>`
+<div class="workout-card">
+<button onclick="showWorkoutDetails(${index})">
+<b>${day.name}</b><span>${day.subtitle}</span>
+<span style="display:block;margin-top:8px">WORKOUT ÖFFNEN →</span>
+</button>
+</div>`).join("")}
+<div class="status" style="margin-top:15px">
+<b>SUPERSET:</b> Zwei Übungen direkt nacheinander ausführen, danach eine Pause machen.<br><br>
+<b>DROPSET:</b> Nach einem Satz das Gewicht reduzieren und direkt weitere kontrollierte Wiederholungen machen.
+</div>`;
+}
+function showWorkoutDetails(index){
+const key=document.getElementById("plan-select").value;
+const day=plans[key].days[index];
+document.getElementById("plan-content").innerHTML=`
+<button class="back-workout" onclick="renderPlan()">← ZURÜCK ZU DEN WORKOUTS</button>
+<h2>${day.name}</h2><p class="muted">${day.subtitle}</p>
+${day.exercises.map((exercise,i)=>`
+<div class="exercise">
+<div class="exercise-name">${i+1}. ${exercise[0]} ${exercise[3]||""}</div>
+<div class="exercise-english">${exercise[1]}</div>
+<div class="exercise-sets">Sätze und Wiederholungen: ${exercise[2]}</div>
+</div>`).join("")}
+<div class="status" style="margin-top:15px">
+<b>TRAININGSTIPP</b><br>Wähle dein Gewicht so, dass du die Wiederholungen sauber schaffst. Steigere das Gewicht erst, wenn du die obere Wiederholungszahl mit guter Technik erreichst.
+</div>
+<div class="status" style="margin-top:8px">
+<b>SUPERSET:</b> Zwei Übungen direkt nacheinander ausführen, danach eine Pause machen.<br><br>
+<b>DROPSET:</b> Nach einem Satz das Gewicht reduzieren und direkt weitere kontrollierte Wiederholungen machen.
+</div>`;
+}
+renderPlan();
+
+// KREATIN – REPARIERTE GEWICHTS-EINGABE UND SPEICHERUNG
+function calculateCreatine(){
+const input=document.getElementById("weight");
+const raw=String(input.value).trim().replace(",",".");
+const weight=Number(raw);
+
+if(!raw || !Number.isFinite(weight) || weight<=0 || weight>300){
+document.getElementById("creatine-result").innerHTML=
+"<span style='color:#ffaaaa'>Bitte gib ein gültiges Gewicht zwischen 1 und 300 kg ein.</span>";
+input.focus();
+return;
+}
+
+// Körpergewicht speichern
+localStorage.setItem("fitnessWeight",weight.toString());
+
+// Berechnung als Orientierung: 0,03 g/kg, mindestens 3 g, höchstens 5 g
+const amount=Math.min(5,Math.max(3,Math.round(weight*.03*10)/10));
+localStorage.setItem("fitnessCreatineAmount",amount.toFixed(1));
+
+showCreatineResult(weight,amount);
+updateCreatineStatus();
+updateHomeCreatine();
+}
+
+function showCreatineResult(weight,amount){
+document.getElementById("creatine-result").innerHTML=
+`<div class="creatine-result">
+<b class="green">GEWICHT ERFOLGREICH GESPEICHERT ✓</b><br>
+Dein Körpergewicht: <b>${weight} kg</b><br>
+Deine berechnete Tagesmenge: <b class="green">${amount.toFixed(1)} g</b>
+</div>`;
+document.getElementById("creatine-amount").innerHTML=
+`<div class="big-number green">${amount.toFixed(1)} g</div>
+Kreatin pro Tag als Orientierung.`;
+}
+
+function loadCreatine(){
+const savedWeight=localStorage.getItem("fitnessWeight");
+const savedAmount=localStorage.getItem("fitnessCreatineAmount");
+const input=document.getElementById("weight");
+
+if(savedWeight){
+input.value=savedWeight;
+const amount=savedAmount?Number(savedAmount):
+Math.min(5,Math.max(3,Math.round(Number(savedWeight)*.03*10)/10));
+showCreatineResult(Number(savedWeight),amount);
+}else{
+document.getElementById("creatine-result").textContent="Noch kein Gewicht eingetragen.";
+document.getElementById("creatine-amount").textContent="Noch nicht berechnet.";
+}
+updateCreatineStatus();
+}
+
+function updateCreatineStatus(){
+const w=localStorage.getItem("fitnessWeight");
+const amount=localStorage.getItem("fitnessCreatineAmount");
+const taken=localStorage.getItem("creatineTaken")===new Date().toDateString();
+const box=document.getElementById("creatine-status");
+if(box){
+box.innerHTML=!w?
+"Trage zuerst dein Gewicht ein.":
+`Gewicht: <b>${w} kg</b><br>Deine gespeicherte Tagesmenge: <b>${amount||"3–5"} g</b><br>${taken?"Heute bereits abgehakt ✓":"Heute noch nicht abgehakt."}`;
+}
+}
+
+function takenCreatine(){
+localStorage.setItem("creatineTaken",new Date().toDateString());
+updateCreatineStatus();
+updateHomeCreatine();
+}
+
+function updateHomeCreatine(){
+const el=document.getElementById("home-creatine");
+if(!el)return;
+const w=localStorage.getItem("fitnessWeight");
+const amount=localStorage.getItem("fitnessCreatineAmount");
+const taken=localStorage.getItem("creatineTaken")===new Date().toDateString();
+el.innerHTML=!w?
+"Noch kein Gewicht hinterlegt.":
+`Dein Gewicht: <b>${w} kg</b><br>Deine Tagesmenge: <b>${amount||"3–5"} g</b><br>${taken?"Kreatin heute erledigt ✓":"Denk an dein Kreatin heute!"}`;
+}
+
+async function enableReminder(){
+if(!("Notification" in window)){
+alert("Dieser Browser unterstützt keine Benachrichtigungen.");
+return;
+}
+const permission=await Notification.requestPermission();
+if(permission==="granted"){
+localStorage.setItem("creatineReminder","yes");
+if(localStorage.getItem("creatineTaken")!==new Date().toDateString()){
+new Notification("Kreatin-Erinnerung",{body:"Zeit für deine tägliche Kreatin-Routine!"});
+}
+alert("Erinnerung aktiviert. Beim Öffnen der App kann sie dich erinnern.");
+}else{
+alert("Benachrichtigungen wurden nicht erlaubt.");
+}
+}
+
+// TIMER
+let remaining=90,interval=null;
+function showClock(){
+const m=Math.floor(remaining/60),s=remaining%60;
+document.getElementById("clock").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+function setTimer(){
+pauseTimer();
+remaining=Number(document.getElementById("timer-duration").value);
+showClock();
+}
+function startTimer(){
+if(interval)return;
+document.getElementById("timer-message").textContent="Pause läuft. Bleib dran!";
+interval=setInterval(()=>{
+remaining--;showClock();
+if(remaining<=0){
+pauseTimer();remaining=0;showClock();
+document.getElementById("timer-message").textContent="PAUSE VORBEI! Nächster Satz. 💪";
+if("Notification" in window&&Notification.permission==="granted"){
+new Notification("Pause vorbei!",{body:"Zeit für deinen nächsten Satz!"});
+}
+if(navigator.vibrate)navigator.vibrate([200,100,200]);
+}
+},1000);
+}
+function pauseTimer(){
+if(interval){clearInterval(interval);interval=null;}
+document.getElementById("timer-message").textContent="Timer pausiert.";
+}
+function resetTimer(){
+pauseTimer();
+remaining=Number(document.getElementById("timer-duration").value);
+showClock();
+document.getElementById("timer-message").textContent="Bereit für deinen nächsten Satz?";
+}
+showClock();
+
+// BARCODE-SCANNER
+let stream=null,scanActive=false,detector=null,scanFrame=null;
+async function startScanner(){
+const area=document.getElementById("scanner-area");
+const video=document.getElementById("video");
+const result=document.getElementById("scan-result");
+if(!navigator.mediaDevices?.getUserMedia){
+result.textContent="Kamerazugriff wird hier nicht unterstützt. Nutze die manuelle Barcode-Eingabe.";return;
+}
+if(!("BarcodeDetector" in window)){
+result.textContent="Dein Browser unterstützt den eingebauten Barcode-Scanner nicht. Nutze die manuelle Eingabe oder einen kompatiblen Browser.";return;
+}
+try{
+detector=new BarcodeDetector({formats:["qr_code","ean_13","ean_8","code_128","code_39","upc_a","upc_e"]});
+stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
+video.srcObject=stream;await video.play();area.style.display="block";
+scanActive=true;result.textContent="Kamera aktiv – Barcode vor die Kamera halten.";
+scanLoop();
+}catch(e){result.textContent="Kamera konnte nicht gestartet werden. Prüfe die Kameraberechtigung und HTTPS.";}
+}
+async function scanLoop(){
+if(!scanActive||!detector)return;
+try{
+const codes=await detector.detect(document.getElementById("video"));
+if(codes.length){
+const code=codes[0].rawValue;
+document.getElementById("barcode").value=code;
+const known=JSON.parse(localStorage.getItem("gymDevices")||"[]");
+const match=known.find(d=>d.code===code);
+if(match){
+document.getElementById("device-name").value=match.name;
+document.getElementById("scan-result").textContent="Bekanntes Gerät: "+match.name;
+}else document.getElementById("scan-result").textContent="Code erkannt: "+code+". Bitte Gerätenamen zuordnen.";
+stopScanner();return;
+}
+}catch(e){}
+scanFrame=requestAnimationFrame(scanLoop);
+}
+function stopScanner(){
+scanActive=false;
+if(scanFrame)cancelAnimationFrame(scanFrame);
+if(stream)stream.getTracks().forEach(t=>t.stop());
+stream=null;
+document.getElementById("scanner-area").style.display="none";
+}
+function saveDevice(){
+const code=document.getElementById("barcode").value.trim();
+const name=document.getElementById("device-name").value.trim();
+if(!code||!name){alert("Bitte Barcode und Gerätenamen eingeben.");return;}
+const devices=JSON.parse(localStorage.getItem("gymDevices")||"[]");
+const index=devices.findIndex(d=>d.code===code);
+if(index>=0)devices[index].name=name;
+else devices.push({code,name});
+localStorage.setItem("gymDevices",JSON.stringify(devices));
+document.getElementById("scan-result").textContent="Gerät gespeichert: "+name;
+renderDevices();
+}
+function renderDevices(){
+const devices=JSON.parse(localStorage.getItem("gymDevices")||"[]");
+document.getElementById("device-list").innerHTML=devices.length?
+devices.map(d=>`<div class="exercise"><b>${escapeHTML(d.name)}</b><small>Code: ${escapeHTML(d.code)}</small></div>`).join("")
+:"<p class='muted'>Noch keine Geräte gespeichert.</p>";
+}
+function escapeHTML(str){
+return String(str).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// HOME-WORKOUTS
+const homeSets={
+short:[["Liegestütze","2 × 8–12"],["Kniebeugen","2 × 12"],["Plank","2 × 30 Sekunden"],["Glute Bridge","2 × 12"]],
+upper:[["Liegestütze","3 × 8–12"],["Pike Push-ups","2 × 6–10"],["Superman","2 × 12"],["Plank Shoulder Taps","2 × 20"]],
+core:[["Plank","3 × 30 Sekunden"],["Dead Bug","2 × 10 je Seite"],["Reverse Crunches","2 × 12"],["Bird Dog","2 × 10 je Seite"]],
+mobility:[["Cat-Cow","2 × 10"],["Brustwirbelsäulen-Rotation","2 × 8 je Seite"],["Hüftbeuger-Mobilisation","2 × 30 Sekunden"],["Schulterkreisen","2 × 15"]]
+};
+function renderHome(){
+const key=document.getElementById("home-level").value;
+document.getElementById("home-content").innerHTML=
+homeSets[key].map((x,i)=>`<div class="exercise"><b>${i+1}. ${x[0]}</b><div class="detail">${x[1]}</div></div>`).join("")+
+"<p class='muted'>Mach die Übungen kontrolliert und ohne Schmerzen. Die Einheit ist eine Ergänzung, kein Ersatz für Erholung.</p>";
+}
+
+// INITIALISIERUNG
+renderHome();
+renderDevices();
+loadCreatine();
+updateHomeCreatine();
+updateCreatineStatus();
+</script>
+</body>
+</html>
